@@ -10,11 +10,11 @@ There is another project of similar purpose called
 [Rinse](http://www.steve.org.uk/Software/rinse/). yumbootstrap differs from
 Rinse as follows:
 
-  * yumbootstrap uses Yum to resolve dependencies, so adding packages to
+  * yumbootstrap uses dnf to resolve dependencies, so adding packages to
     installation list is easier (no need to track dependencies manually).
-  * Using multiple Yum repositories for installation is supported.
+  * Using multiple dnf repositories for installation is supported.
   * yumbootstrap checks signatures on installed RPM packages.
-  * yumbootstrap doesn't depend on Yum mirror to list directory contents, so
+  * yumbootstrap doesn't depend on dnf mirror to list directory contents, so
     it's less work to setup local mirror usable with yumbootstrap.
 
 Examples of use
@@ -50,7 +50,7 @@ Installing yumbootstrap
 -----------------------
 
 For Debian-based distributions, *dpkg-dev*, *fakeroot*, *debhelper* (9+),
-*python3*, and *python3-setuptools*. For installing the package, *yum* is also
+*python3*, and *python3-setuptools*. For installing the package, *dnf* is also
 required.
 
     dpkg-buildpackage -b -uc
@@ -60,7 +60,7 @@ For Red Hat derivatives you need *rpm-build* and *python3-setuptools*.
 
     make srpm
     rpmbuild --rebuild yumbootstrap-*.src.rpm
-    yum localinstall --nogpgcheck /usr/src/redhat/RPMS/*/yumbootstrap-*.rpm
+    dnf localinstall --nogpgcheck /usr/src/redhat/RPMS/*/yumbootstrap-*.rpm
 
 Contact and License
 -------------------

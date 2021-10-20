@@ -3,7 +3,7 @@
 import os
 import time
 import logging
-import yumbootstrap.yum
+import yumbootstrap.dnf
 import yumbootstrap.log
 
 #-----------------------------------------------------------------------------
@@ -15,16 +15,16 @@ if os.environ['VERBOSE'] == 'true':
 
 #-----------------------------------------------------------------------------
 
-yum = yumbootstrap.yum.Yum(chroot = os.environ['TARGET'])
+dnf = yumbootstrap.dnf.Dnf(chroot = os.environ['TARGET'])
 
-# to prevent yumbootstrap.yum.Yum from running Python in chroot $TARGET
+# to prevent yumbootstrap.dnf.Dnf from running Python in chroot $TARGET
 # one may specify `expected_rpmdb_dir' manually:
-#   yum.fix_rpmdb(expected_rpmdb_dir = '/var/lib/rpm')
+#   dnf.fix_rpmdb(expected_rpmdb_dir = '/var/lib/rpm')
 # if /usr/bin/db_load or /bin/rpm have a different name, this also could be
 # provided:
-#   yum.fix_rpmdb(db_load = '/usr/bin/db_load')
-#   yum.fix_rpmdb(rpm = '/bin/rpm')
-yum.fix_rpmdb()
+#   dnf.fix_rpmdb(db_load = '/usr/bin/db_load')
+#   dnf.fix_rpmdb(rpm = '/bin/rpm')
+dnf.fix_rpmdb()
 
 #-----------------------------------------------------------------------------
 # vim:ft=python

@@ -5,7 +5,7 @@ import yumbootstrap.sh as sh
 import yumbootstrap.fs as fs
 
 import logging
-logger = logging.getLogger("yum")
+logger = logging.getLogger("dnf")
 
 #-----------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ def mklist(value):
 
 #-----------------------------------------------------------------------------
 
-class YumConfig:
+class DnfConfig:
   def __init__(self, chroot, repos = {}, env = None):
     self.chroot = os.path.abspath(chroot)
     self.repos = repos.copy() # shallow copy is enough
@@ -73,7 +73,7 @@ class YumConfig:
       'obsoletes = 1\n' \
       '#multilib_policy = all | best\n' \
       'cachedir = /yumbootstrap/cache\n' \
-      'logfile  = /yumbootstrap/log/yum.log\n'
+      'logfile  = /yumbootstrap/log/dnf.log\n'
     main += 'gpgcheck = %d\n' % (gpgcheck)
     main += 'reposdir = %s/yumbootstrap/yum.repos.d\n' % (gpgcheck)
 
@@ -86,27 +86,27 @@ class YumConfig:
 # TODO:
 #   * setarch
 #   * should `chroot' go through YumConfig?
-class Yum:
-  def __init__(self, chroot, yum_conf = None, yum = '/usr/bin/yum',
+class Dnf:
+  def __init__(self, chroot, dnf_conf = None, dnf = '/usr/bin/dnf',
                interactive = False):
     self.chroot = os.path.abspath(chroot)
-    if yum_conf is not None:
-      self.yum_conf = yum_conf
+    if dnf_conf is not None:
+      self.dnf_conf = dnf_conf
     else:
-      self.yum_conf = YumConfig(chroot = chroot)
-    self.yum = yum # yum from host OS
+      self.dnf_conf = DnfConfig(chroot = chroot)
+    self.dnf = dnf # dnf from host OS
     self.interactive = interactive
     self.rpmdb_fixed = False
-    # NOTE: writing yum.conf is delayed to the first operation
+    # NOTE: writing dnf.conf is delayed to the first operation
 
-  def _yum_call(self):
-    yum_conf = self.yum_conf.config_file
+  def _dnf_call(self):
+    dnf_conf = self.dnf_conf.config_file
 
-    if not os.path.exists(yum_conf):
-      logger.info("%s doesn't exist, creating one", yum_conf)
-      fs.touch(yum_conf, text = self.yum_conf.text())
+    if not os.path.exists(dnf_conf):
+      logger.info("%s doesn't exist, creating one", dnf_conf)
+      fs.touch(dnf_conf, text = self.dnf_conf.text())
 
-    opts = [self.yum, '-c', yum_conf, '--installroot', self.chroot, '-y']
+    opts = [self.dnf, '-c', dnf_conf, '--installroot', self.chroot, '-y']
 
     if self.interactive:
       opts.extend(['-e', '1', '-d', '2'])
@@ -122,8 +122,8 @@ class Yum:
     exclude_opts = ["--exclude=" + pkg for pkg in exclude]
 
     sh.run(
-      self._yum_call() + exclude_opts + ['install'] + mklist(packages),
-      env = self.yum_conf.env,
+      self._dnf_call() + exclude_opts + ['install'] + mklist(packages),
+      env = self.dnf_conf.env,
     )
 
   def group_install(self, groups, exclude = []):
@@ -133,13 +133,13 @@ class Yum:
     exclude_opts = ["--exclude=" + pkg for pkg in exclude]
 
     sh.run(
-      self._yum_call() + exclude_opts + ['groupinstall'] + mklist(groups),
-      env = self.yum_conf.env,
+      self._dnf_call() + exclude_opts + ['groupinstall'] + mklist(groups),
+      env = self.dnf_conf.env,
     )
 
   def clean(self):
-    logger.info("removing directory %s", self.yum_conf.root_dir)
-    shutil.rmtree(self.yum_conf.root_dir, ignore_errors = True)
+    logger.info("removing directory %s", self.dnf_conf.root_dir)
+    shutil.rmtree(self.dnf_conf.root_dir, ignore_errors = True)
 
   def fix_rpmdb(self, expected_rpmdb_dir = None,
                 db_load = 'db_load', rpm = 'rpm'):
@@ -154,7 +154,7 @@ class Yum:
     current_rpmdb_dir = sh.run(
         [platform_python, '-c', 'import rpm; print(rpm.expandMacro("%{_dbpath}"))'],
         pipe = sh.READ,
-        env = self.yum_conf.env,
+        env = self.dnf_conf.env,
       ).strip()
 
     if expected_rpmdb_dir is None:
@@ -162,7 +162,7 @@ class Yum:
         ['/usr/libexec/platform-python', '-c', 'import rpm; print(rpm.expandMacro("%{_dbpath}"))'],
         chroot = self.chroot,
         pipe = sh.READ,
-        env = self.yum_conf.env,
+        env = self.dnf_conf.env,
       ).strip()
 
     # input directory
@@ -177,12 +177,12 @@ class Yum:
     in_command = sh.run(
       ['db_dump', in_pkg_db],
       pipe = sh.READ,
-      env = self.yum_conf.env,
+      env = self.dnf_conf.env,
     )
     out_command = sh.run(
       [db_load, tmp_pkg_db],
       chroot = self.chroot, pipe = sh.WRITE,
-      env = self.yum_conf.env,
+      env = self.dnf_conf.env,
     )
     for line in in_command:
         out_command.write(line)
@@ -202,7 +202,7 @@ class Yum:
     sh.run(
       [rpm, '--rebuilddb'],
       chroot = self.chroot,
-      env = self.yum_conf.env,
+      env = self.dnf_conf.env,
     )
 
     if current_rpmdb_dir != expected_rpmdb_dir:

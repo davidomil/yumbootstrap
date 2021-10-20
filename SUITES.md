@@ -67,7 +67,7 @@ Environment variables set by yumbootstrap:
 
 ### [environment] section
 
-Yum and post-install scripts are run with environment variables reset
+dnf and post-install scripts are run with environment variables reset
 completely. `[environment]` section is a mean to pass some variables down to
 these processes.
 
@@ -119,7 +119,7 @@ with `#`) and empty lines are ignored.
 
 A line may start with `@` sign, which denotes a package group to be installed.
 If it starts with `-` sign, it specifies a package to be excluded from
-installation. Any other line is passed to Yum as is. This way package names,
+installation. Any other line is passed to dnf as is. This way package names,
 paths and virtual dependencies (e.g. `perl(Foo::Bar)`) are all supported.
 
 ### example package list file

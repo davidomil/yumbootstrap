@@ -3,8 +3,8 @@ Limitations/known issues
 
 ### Red Hat Enterprise Linux 4
 
-This release was maintained with `up2date` and Yum was yet to come. To enable
-installation with yumbootstrap, you need to prepare Yum metadata. After this,
+This release was maintained with `up2date` and dnf was yet to come. To enable
+installation with yumbootstrap, you need to prepare dnf metadata. After this,
 installation should go just fine.
 
 CentOS just works on this matter, though. CentOS 4

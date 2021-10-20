@@ -7,7 +7,7 @@ import errno
 import logging
 import yumbootstrap.log
 
-import yumbootstrap.yum
+import yumbootstrap.dnf
 import yumbootstrap.suites
 from yumbootstrap.exceptions import YBError
 
@@ -68,7 +68,7 @@ def add_kv_list(option, opt, value, parser, attr):
 o.add_option(
   '--print-config',
   action = 'store_const', dest = 'action', const = 'yum.conf',
-  help = 'print Yum configuration which will be used by yumbootstrap',
+  help = 'print dnf configuration which will be used by yumbootstrap',
 )
 o.add_option(
   '--list-suites',
@@ -169,7 +169,7 @@ o.add_option(
   '--repo',
   action = 'callback', type = 'string',
   callback = add_kv_list, callback_args = ('repositories',),
-  help = 'use this Yum repository (may be specified multiple times)',
+  help = 'use this dnf repository (may be specified multiple times)',
   metavar = 'NAME=URL',
 )
 #o.add_option(
@@ -224,8 +224,8 @@ def write_cached_suite(yumbootstrap_dir, suite_dir, suite_name):
 
 # helper function
 def read_cached_suite(target):
-  yum_conf = yumbootstrap.yum.YumConfig(chroot = target)
-  suite_location_file = os.path.join(yum_conf.root_dir, 'suite_location')
+  dnf_conf = yumbootstrap.dnf.DnfConfig(chroot = target)
+  suite_location_file = os.path.join(dnf_conf.root_dir, 'suite_location')
   try:
     suite_location = dict([
       line.strip().split(': ', 1)
@@ -306,48 +306,48 @@ def do_install(opts, suite_name, target):
     logger.info("using built-in repositories")
     repositories = suite.repositories
 
-  yum_conf = yumbootstrap.yum.YumConfig(
+  dnf_conf = yumbootstrap.dnf.DnfConfig(
     chroot = target,
     repos = repositories,
     env = suite.environment,
   )
 
-  write_cached_suite(yum_conf.root_dir, opts.suite_dir, suite_name)
+  write_cached_suite(dnf_conf.root_dir, opts.suite_dir, suite_name)
 
   # installing works also without adding key, but --nogpgcheck is passed to
-  # Yum, so it's generally discouraged
+  # dnf, so it's generally discouraged
   if len(opts.gpg_keys) > 0 or len(suite.gpg_keys) > 0:
     logger.info("adding GPG keys")
     for keyfile in opts.gpg_keys:
-      yum_conf.add_key(keyfile)
+      dnf_conf.add_key(keyfile)
     for keyfile in suite.gpg_keys:
-      yum_conf.add_key(keyfile)
+      dnf_conf.add_key(keyfile)
   else:
     pass # TODO: print warning
 
-  yum = yumbootstrap.yum.Yum(
+  dnf = yumbootstrap.dnf.Dnf(
     chroot = target,
-    yum_conf = yum_conf,
+    dnf_conf = dnf_conf,
     interactive = opts.interactive,
   )
 
   exclude = suite.packages.exclude + opts.exclude
 
-  # main set of packages (should already include yum and /usr/bin/db_load, so
-  # `yum.fix_rpmdb()' works)
+  # main set of packages (should already include dnf and /usr/bin/db_load, so
+  # `dnf.fix_rpmdb()' works)
   logger.info("installing default packages for %s %s",
               suite.name, suite.release)
   install = suite.packages.install + ['@' + g for g in suite.packages.groups]
-  yum.install(install, exclude = exclude)
+  dnf.install(install, exclude = exclude)
 
   # requested additional packages
   if len(opts.include) > 0:
     logger.info("installing additional packages requested from command line")
-    yum.install(opts.include, exclude = exclude)
+    dnf.install(opts.include, exclude = exclude)
   if len(opts.groups) > 0:
     logger.info("installing additional package groups requested from "
                 "command line")
-    yum.group_install(opts.groups, exclude = exclude)
+    dnf.group_install(opts.groups, exclude = exclude)
 
   if len(suite.post_install) > 0:
     if opts.run_scripts:
@@ -382,7 +382,7 @@ def do_scripts(opts, target, *scripts):
 
 #-----------------------------------------------------------
 
-def do_yum_conf(opts, suite, target):
+def do_dnf_conf(opts, suite, target):
   logger.setLevel(logging.WARNING) # do not honour --verbose option
   import yumbootstrap.suites
   suite = yumbootstrap.suites.load_suite(opts.suite_dir, suite)
@@ -392,16 +392,16 @@ def do_yum_conf(opts, suite, target):
   else:
     repositories = suite.repositories
 
-  yum_conf = yumbootstrap.yum.YumConfig(chroot = target, repos = repositories)
+  dnf_conf = yumbootstrap.dnf.DnfConfig(chroot = target, repos = repositories)
 
   if len(opts.gpg_keys) > 0:
-    cmd = 'cat %s > %s' % (' '.join(opts.gpg_keys), yum_conf.gpg_keys)
+    cmd = 'cat %s > %s' % (' '.join(opts.gpg_keys), dnf_conf.gpg_keys)
     sys.stdout.write('# remember to put the keys to target directory:\n')
     sys.stdout.write('# %s\n\n' % (cmd))
     for keyfile in opts.gpg_keys:
-      yum_conf.add_key(keyfile, pretend = True)
+      dnf_conf.add_key(keyfile, pretend = True)
 
-  sys.stdout.write(yum_conf.text())
+  sys.stdout.write(dnf_conf.text())
   sys.stdout.flush()
 
 #-----------------------------------------------------------
@@ -418,7 +418,7 @@ try:
   elif opts.action == 'scripts':
     do_scripts(opts, *args)
   elif opts.action == 'yum.conf':
-    do_yum_conf(opts, *args)
+    do_dnf_conf(opts, *args)
   else:
     # should never happen
     o.error("unrecognized action: %s" % (opts.action,))
