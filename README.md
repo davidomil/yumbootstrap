@@ -43,7 +43,7 @@ Installing *centos-6* suite, installing custom packages by hand from parent OS:
 
     # CHROOT=/mnt/chroot/centos-6-chroot
     # /usr/sbin/yumbootstrap --verbose --no-scripts centos-6 $CHROOT
-    # yum --installroot=$CHROOT -c $CHROOT/yumbootstrap/yum.conf install ...
+    # yum --installroot=$CHROOT -c $CHROOT/yumbootstrap/dnf.conf install ...
     # /usr/sbin/yumbootstrap --verbose --just-scripts $CHROOT
 
 Installing yumbootstrap

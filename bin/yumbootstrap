@@ -25,7 +25,7 @@ logger.addHandler(yumbootstrap.log.ProgressHandler())
 
 o = optparse.OptionParser(
   usage = '\n  %prog [options] <suite> <target>'
-          '\n  %prog [options] --print-config <suite> <target> > yum.conf'
+          '\n  %prog [options] --print-config <suite> <target> > dnf.conf'
           '\n  %prog [options] --list-suites'
           '\n  %prog [options] <suite|target> --list-scripts'
           '\n  %prog [options] <target> --just-scripts [script script ...]'
@@ -37,7 +37,7 @@ o = optparse.OptionParser(
 
 expected_nargs = {
   'install':      (lambda n: n == 2),
-  'yum.conf':     (lambda n: n == 2),
+  'dnf.conf':     (lambda n: n == 2),
   'list_suites':  (lambda n: n == 0),
   'list_scripts': (lambda n: n == 1),
   'scripts':      (lambda n: n >= 1),
@@ -67,7 +67,7 @@ def add_kv_list(option, opt, value, parser, attr):
 
 o.add_option(
   '--print-config',
-  action = 'store_const', dest = 'action', const = 'yum.conf',
+  action = 'store_const', dest = 'action', const = 'dnf.conf',
   help = 'print dnf configuration which will be used by yumbootstrap',
 )
 o.add_option(
@@ -308,8 +308,9 @@ def do_install(opts, suite_name, target):
 
   dnf_conf = yumbootstrap.dnf.DnfConfig(
     chroot = target,
-    repos = repositories,
+    repos =repositories,
     env = suite.environment,
+    release= suite.release,
   )
 
   write_cached_suite(dnf_conf.root_dir, opts.suite_dir, suite_name)
@@ -392,7 +393,7 @@ def do_dnf_conf(opts, suite, target):
   else:
     repositories = suite.repositories
 
-  dnf_conf = yumbootstrap.dnf.DnfConfig(chroot = target, repos = repositories)
+  dnf_conf = yumbootstrap.dnf.DnfConfig(chroot = target, repos = repositories, release= suite.release)
 
   if len(opts.gpg_keys) > 0:
     cmd = 'cat %s > %s' % (' '.join(opts.gpg_keys), dnf_conf.gpg_keys)
@@ -417,7 +418,7 @@ try:
     do_list_scripts(opts, *args)
   elif opts.action == 'scripts':
     do_scripts(opts, *args)
-  elif opts.action == 'yum.conf':
+  elif opts.action == 'dnf.conf':
     do_dnf_conf(opts, *args)
   else:
     # should never happen

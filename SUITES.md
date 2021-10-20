@@ -61,7 +61,7 @@ Environment variables set by yumbootstrap:
   * `$YUMBOOTSTRAP_DIR` -- directory with yumbootstrap's installation data,
     relative to `$TARGET`
   * `$YUM_CONF` -- `yum.conf` path, relative to `$TARGET`; full path to
-    `yum.conf` is `$TARGET/$YUM_CONF`
+    `dnf.conf` is `$TARGET/$YUM_CONF`
   * `$SCRIPT_NAME` -- name of the script (the token before `=` or `?=`)
   * `$SCRIPT_PATH` -- path to the script
 
