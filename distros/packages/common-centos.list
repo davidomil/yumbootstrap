@@ -13,7 +13,7 @@ less
 make
 mktemp
 vim-minimal
-dnf
+yum
 #authconfig
 #dhclient
 chkconfig
