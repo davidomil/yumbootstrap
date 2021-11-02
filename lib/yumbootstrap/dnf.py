@@ -115,7 +115,7 @@ class Dnf:
             logger.info("%s doesn't exist, creating one", dnf_conf)
             fs.touch(dnf_conf, text=self.dnf_conf.text())
 
-        opts = [self.dnf, '-c', dnf_conf, '--installroot', self.chroot, '-y', '--releasever=', self.dnf_conf.release]
+        opts = [self.dnf, '-c', dnf_conf, '--installroot', self.chroot, '-y', '--releasever', self.dnf_conf.release]
 
         if self.interactive:
             opts.extend(['-e', '1', '-d', '2'])
