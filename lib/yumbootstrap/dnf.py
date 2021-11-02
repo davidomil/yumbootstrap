@@ -84,7 +84,7 @@ class DnfConfig:
             'logfile  = /yumbootstrap/log/dnf.log\n'
         main += 'gpgcheck = %d\n' % (gpgcheck)
         main += 'reposdir = %s/yumbootstrap/dnf.repos.d\n' % (gpgcheck)
-
+        logger.info(f"release = {self.release}")
         repos = [repo(name, self.repos[name], self.release) for name in sorted(self.repos)]
 
         return main + ''.join(repos)
@@ -182,6 +182,11 @@ class Dnf:
         in_pkg_db = os.path.join(rpmdb_dir, 'Packages')
         tmp_pkg_db = os.path.join(expected_rpmdb_dir, 'Packages.tmp')
         out_pkg_db = os.path.join(expected_rpmdb_dir, 'Packages')
+
+        rpm_database_fix = sh.run(['rpmdb', '--rebuilddb'], chroot=self.chroot, pipe=sh.READ,
+                                  env=self.dnf_conf.env).strip()
+
+        logger.info(rpm_database_fix)
 
         in_command = sh.run(
             ['db_dump', in_pkg_db],

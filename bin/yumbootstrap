@@ -224,7 +224,7 @@ def write_cached_suite(yumbootstrap_dir, suite_dir, suite_name):
 
 # helper function
 def read_cached_suite(target):
-  dnf_conf = yumbootstrap.dnf.DnfConfig(chroot = target)
+  dnf_conf = yumbootstrap.dnf.DnfConfig(chroot = target,)
   suite_location_file = os.path.join(dnf_conf.root_dir, 'suite_location')
   try:
     suite_location = dict([
