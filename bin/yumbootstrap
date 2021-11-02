@@ -262,6 +262,7 @@ def run_post_install_scripts(suite, skip = [], just = []):
     logger.info("running %s", script_name)
     os.environ['SCRIPT_NAME'] = script_name
     os.environ['SCRIPT_PATH'] = script[0]
+    os.environ['RELEASE'] = suite.release
     sh.run(script, env = suite.environment)
 
 #-----------------------------------------------------------
@@ -349,6 +350,8 @@ def do_install(opts, suite_name, target):
     logger.info("installing additional package groups requested from "
                 "command line")
     dnf.group_install(opts.groups, exclude = exclude)
+
+  dnf.fix_releasever()
 
   if len(suite.post_install) > 0:
     if opts.run_scripts:

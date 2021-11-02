@@ -115,7 +115,7 @@ class Dnf:
             logger.info("%s doesn't exist, creating one", dnf_conf)
             fs.touch(dnf_conf, text=self.dnf_conf.text())
 
-        opts = [self.dnf, '-c', dnf_conf, '--installroot', self.chroot, '-y']
+        opts = [self.dnf, '-c', dnf_conf, '--installroot', self.chroot, '-y', '--releasever=', self.dnf_conf.release]
 
         if self.interactive:
             opts.extend(['-e', '1', '-d', '2'])
@@ -149,6 +149,14 @@ class Dnf:
     def clean(self):
         logger.info("removing directory %s", self.dnf_conf.root_dir)
         shutil.rmtree(self.dnf_conf.root_dir, ignore_errors=True)
+
+    def fix_releasever(self):
+        logger.info("Fixing releasever for yum")
+
+        sh.run(
+            self._dnf_call() + ['install', 'system-release'],
+            env=self.dnf_conf.env,
+        )
 
     def fix_rpmdb(self, expected_rpmdb_dir=None,
                   db_load='db_load', rpm='rpm'):
