@@ -1,0 +1,22 @@
+name = Alma Linux
+release = 9
+
+gpg_key =  gpg/RPM-GPG-KEY-AlmaLinux-9
+
+packages = packages/${suite}.list
+
+[post_install]
+finalize = scripts/fix_rpmdb.py
+finalize = scripts/clean_yumbootstrap.py
+
+[repositories]
+almalinux           = http://repo.almalinux.org/almalinux/9/BaseOS/$basearch/os/
+almalinux-appstream = http://repo.almalinux.org/almalinux/9/AppStream/$basearch/os/
+almalinux-extras    = http://repo.almalinux.org/almalinux/9/extras/$basearch/os/
+
+[environment]
+#PYTHONPATH=...
+#PYTHONPATH
+#SUDO_*
+
+# vim:ft=dosini
